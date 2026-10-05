@@ -11,10 +11,20 @@ public class ContactPageTests : IAsyncLifetime
     public Task InitializeAsync() => _fixture.InitializeAsync(); // launches a fresh browser before each test
     public Task DisposeAsync() => _fixture.DisposeAsync();       // closes it afterwards
 
-    // Reason: validates that the Contact form guides users correctly - submitting with
-    // required fields empty must show a clear "required" error per field, and those errors
-    // must disappear once the user fixes them. Without this, users could be stuck unable to
-    // tell why submission is blocked, or see stale errors after correcting their input.
+    /// <summary>
+    /// Test Case 1: Contact Form - Mandatory Field Validation
+    ///
+    /// Summary: Navigates from the Home page to Contact, submits the form empty, verifies a
+    /// "required" error appears for each mandatory field (Forename, Email, Message), then
+    /// fills those fields in and verifies every error disappears.
+    ///
+    /// Business Context: The Contact form is a primary channel for customers to reach the
+    /// business directly. If validation doesn't clearly flag missing required fields,
+    /// customers may abandon the form in confusion, or submit incomplete enquiries that staff
+    /// can't action (e.g. no email address to reply to). This test confirms the form blocks
+    /// incomplete submissions with clear, field-specific errors, and that those errors clear
+    /// once corrected so the user isn't left thinking something is still wrong.
+    /// </summary>
     [Fact]
     public async Task ContactPage_SubmitEmptyForm_ShowsRequiredErrors_ThenClearsAfterMandatoryFieldsFilled()
     {
@@ -40,10 +50,18 @@ public class ContactPageTests : IAsyncLifetime
         await Assertions.Expect(contactPage.ErrorAlert).Not.ToBeVisibleAsync();          // page-level error banner is gone too
     }
 
-    // Reason: validates the Contact form's happy path - once every mandatory field is filled
-    // in correctly, submission must succeed and the user must see a clear confirmation that
-    // their feedback was received. This is the core function of the page; if it silently
-    // failed to submit, the business would lose customer feedback without anyone noticing.
+    /// <summary>
+    /// Test Case 2: Contact Form - Successful Submission
+    ///
+    /// Summary: Navigates from the Home page to Contact, fills in the mandatory fields
+    /// (Forename, Email, Message) with valid values, submits the form, and verifies the
+    /// success banner confirms the submission.
+    ///
+    /// Business Context: This is the Contact form's core "happy path" - a customer with a
+    /// genuine enquiry or piece of feedback fills in the form and expects confirmation that
+    /// it reached the business. If submission silently failed or gave no confirmation,
+    /// customer feedback would be lost without the customer or the business ever knowing.
+    /// </summary>
     [Fact]
     public async Task ContactPage_SubmitWithMandatoryFieldsPopulated_ShowsSuccessMessage()
     {

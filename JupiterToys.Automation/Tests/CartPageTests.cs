@@ -11,10 +11,21 @@ public class CartPageTests : IAsyncLifetime
     public Task InitializeAsync() => _fixture.InitializeAsync(); // launches a fresh browser before each test
     public Task DisposeAsync() => _fixture.DisposeAsync();       // closes it afterwards
 
-    // Reason: validates the cart's pricing math for a multi-item, multi-quantity basket -
-    // each line's price and subtotal must be correct, and the grand total must equal the sum
-    // of all subtotals. This is the core trust-sensitive calculation on an e-commerce site;
-    // a pricing bug here would mean customers are charged the wrong amount.
+    /// <summary>
+    /// Test Case 3: Shopping Cart - Pricing and Total Calculation Accuracy
+    ///
+    /// Summary: Buys 2x Stuffed Frog, 5x Fluffy Bunny and 3x Valentine Bear from the Shop
+    /// page, then on the Cart page verifies each product's unit price matches what Shop
+    /// advertised, each line's subtotal equals price x quantity, and the grand total equals
+    /// the sum of all subtotals.
+    ///
+    /// Business Context: Cart pricing is the most financially sensitive calculation on an
+    /// e-commerce site - customers are charged based on exactly what the cart displays. An
+    /// error in a line's unit price, its subtotal, or the grand total could mean customers
+    /// are undercharged (direct revenue loss) or overcharged (customer trust and compliance
+    /// risk). This test validates that pricing math holds across multiple products bought in
+    /// different quantities within a single basket.
+    /// </summary>
     [Fact]
     public async Task CartPage_WithMultipleProductsAndQuantities_CalculatesPricesAndTotalCorrectly()
     {
