@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="JupiterToys.Automation.Reporting/JupiterToys.Automation.Reporting.csproj" />
+  <Project Path="JupiterToys.Automation/JupiterToys.Automation.csproj" />
+</Solution>
