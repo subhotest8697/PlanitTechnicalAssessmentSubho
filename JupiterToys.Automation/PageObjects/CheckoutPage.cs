@@ -58,11 +58,7 @@ public class CheckoutPage : BasePage
         await CardNumberInput.BlurAsync();
     }
 
-    /// <summary>
-    /// Submits the order and waits out the "Processing Order" progress-bar modal
-    /// (its duration is randomized by the app), then returns the success banner's text
-    /// and parsed order number. Throws if the form was invalid and submission did not proceed.
-    /// </summary>
+    // Waits out the "Processing Order" modal, whose duration is randomized by the app.
     public async Task<OrderConfirmation> SubmitOrderAsync()
     {
         await SubmitButton.ClickAsync();

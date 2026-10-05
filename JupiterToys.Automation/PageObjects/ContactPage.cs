@@ -55,10 +55,8 @@ public class ContactPage : BasePage
         return (await Page.Locator($"#{fieldId}-err").InnerTextAsync()).Trim();
     }
 
-    // AngularJS's ui-if removes the error <span> from the DOM entirely when the field is valid
-    // (it isn't just hidden), so this must be a non-waiting visibility check - calling
-    // GetFieldErrorAsync for a field with no error would hang waiting for an element that
-    // will never appear.
+    // Non-waiting check: the error <span> is removed from the DOM (not just hidden) once the
+    // field is valid, so GetFieldErrorAsync would hang waiting for an element that never appears.
     public async Task<bool> HasFieldErrorAsync(string fieldId)
     {
         return await Page.Locator($"#{fieldId}-err").IsVisibleAsync();
@@ -77,12 +75,7 @@ public class ContactPage : BasePage
         }
     }
 
-    /// <summary>
-    /// Waits for the success banner to appear after submitting. contactValidSubmit flips to
-    /// true asynchronously after a randomized server-side delay (the same pattern as the
-    /// Checkout page's "Processing Order" step), so this uses a generous 30s timeout rather
-    /// than assuming an instant swap.
-    /// </summary>
+    // The success banner appears after a randomized server-side delay, hence the generous timeout.
     public async Task<string> GetConfirmationMessageAsync()
     {
         await SuccessAlert.WaitForAsync(new LocatorWaitForOptions { Timeout = 30000 });

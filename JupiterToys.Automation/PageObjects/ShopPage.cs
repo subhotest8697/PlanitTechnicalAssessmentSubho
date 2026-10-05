@@ -31,12 +31,8 @@ public class ShopPage : BasePage
         await ProductByName(productName).Locator("a.btn-success").ClickAsync();
     }
 
-    /// <summary>
-    /// Clicking "Buy" on a product already in the cart increments its quantity rather than
-    /// adding a duplicate line (confirmed against the live app), so buying N units is just
-    /// N clicks. A small pause between clicks avoids racing the AngularJS digest cycle that
-    /// updates the cart count.
-    /// </summary>
+    // Clicking "Buy" on a product already in the cart increments its quantity rather than
+    // adding a duplicate line, so buying N units is N clicks.
     public async Task BuyProductAsync(string productName, int quantity)
     {
         for (var i = 0; i < quantity; i++)
