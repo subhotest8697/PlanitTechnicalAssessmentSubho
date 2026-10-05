@@ -61,14 +61,23 @@ public class ContactPageTests : IAsyncLifetime
     /// genuine enquiry or piece of feedback fills in the form and expects confirmation that
     /// it reached the business. If submission silently failed or gave no confirmation,
     /// customer feedback would be lost without the customer or the business ever knowing.
+    ///
+    /// Run 5 times (one fresh browser per iteration via IAsyncLifetime) per the brief's
+    /// requirement to demonstrate a 100% pass rate across repeated runs; each iteration is
+    /// reported as its own pass/fail result in the test runner and CI output.
     /// </summary>
-    [Fact]
-    public async Task ContactPage_SubmitWithMandatoryFieldsPopulated_ShowsSuccessMessage()
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    public async Task ContactPage_SubmitWithMandatoryFieldsPopulated_ShowsSuccessMessage(int iteration)
     {
         var contactPage = await NavigateToContactPageAsync(); // Home -> Contact
 
-        await FillMandatoryFieldsAsync(contactPage); // populate Forename, Email and Message
-        await contactPage.SubmitAsync();             // submit the form
+        await FillMandatoryFieldsAsync(contactPage, iteration); // populate Forename, Email and Message
+        await contactPage.SubmitAsync();                        // submit the form
 
         var confirmationMessage = await contactPage.GetConfirmationMessageAsync(); // wait for and read the success banner
 
@@ -86,7 +95,9 @@ public class ContactPageTests : IAsyncLifetime
     }
 
     // Surname and Telephone are optional on this form and are deliberately left blank.
-    private static async Task FillMandatoryFieldsAsync(ContactPage contactPage)
+    // `iteration`, when supplied, is embedded in the message so each of the 5 repeated runs
+    // submits distinct content rather than resubmitting an identical message 5 times.
+    private static async Task FillMandatoryFieldsAsync(ContactPage contactPage, int? iteration = null)
     {
         await contactPage.ForenameInput.FillAsync("Jane"); // type a forename
         await contactPage.ForenameInput.BlurAsync();       // leave the field, triggering validation
@@ -94,7 +105,10 @@ public class ContactPageTests : IAsyncLifetime
         await contactPage.EmailInput.FillAsync("jane.doe@example.com"); // type a valid email
         await contactPage.EmailInput.BlurAsync();                       // leave the field, triggering validation
 
-        await contactPage.MessageInput.FillAsync("This is a test message for the contact form."); // type a message
-        await contactPage.MessageInput.BlurAsync();                                                // leave the field, triggering validation
+        var message = iteration is null
+            ? "This is a test message for the contact form."
+            : $"This is a test message for the contact form. (Run {iteration} of 5)";
+        await contactPage.MessageInput.FillAsync(message); // type a message
+        await contactPage.MessageInput.BlurAsync();         // leave the field, triggering validation
     }
 }

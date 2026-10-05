@@ -32,13 +32,19 @@ public class ShopPage : BasePage
     }
 
     // Clicking "Buy" on a product already in the cart increments its quantity rather than
-    // adding a duplicate line, so buying N units is N clicks.
+    // adding a duplicate line, so buying N units is N clicks. Each click waits for the navbar
+    // cart count to reflect the increment (rather than a fixed delay) so the next click can't
+    // race the Angular digest cycle that updates it.
     public async Task BuyProductAsync(string productName, int quantity)
     {
+        var navigation = Navigation;
+        var expectedCount = await navigation.GetCartCountAsync();
+
         for (var i = 0; i < quantity; i++)
         {
             await BuyProductAsync(productName);
-            await Page.WaitForTimeoutAsync(150);
+            expectedCount++;
+            await Assertions.Expect(navigation.CartCount).ToHaveTextAsync(expectedCount.ToString());
         }
     }
 
