@@ -59,25 +59,17 @@ This writes `report.json` and `report.html` (defaulting to a `report/` folder ne
 ## CI/CD
 
 Builds run in TeamCity under the build configuration
-[`PlanitTechnicalAssessmentSubho_JupiterToysAutomation`](https://planittesting.teamcity.com/buildConfiguration/PlanitTechnicalAssessmentSubho_JupiterToysAutomation),
-triggered on commits to `main`.
+[`PlanitTechnicalAssessmentSubho_JupiterToysAutomation`](https://planittesting.teamcity.com/buildConfiguration/PlanitTechnicalAssessmentSubho_JupiterToysAutomation).
 
-### Build steps
+If you don't have access to that TeamCity instance, you can run the same pipeline locally:
 
-1. **Restore** — `dotnet restore`
-2. **Install browsers** — `pwsh JupiterToys.Automation/bin/Debug/net10.0/playwright.ps1 install chromium`
-   (or rely on the fixture's local Chrome/Edge fallback — see [`PlaywrightFixture`](JupiterToys.Automation/Fixtures/PlaywrightFixture.cs) — if the
-   build agent can't reach the Playwright CDN)
-3. **Build** — `dotnet build --configuration Release`
-4. **Test** — `dotnet test --configuration Release --logger "trx;LogFileName=results.trx"`
-   - Runs headless against the live `jupiter.cloud.planittesting.com` site, so the build agent needs outbound internet access
-   - Produces `TestResults/results.trx`
-5. **Report** — `dotnet run --project JupiterToys.Automation.Reporting --configuration Release -- TestResults/results.trx TestResults/report`
-   - Converts the `.trx` into `report.json` and `report.html`; exits non-zero if any test failed, which should fail the build step
-6. **Publish artifacts** — archive `TestResults/results.trx`, `TestResults/report/report.json`, and `TestResults/report/report.html` so results are viewable from the build's Artifacts tab
+```bash
+dotnet restore
+dotnet build --configuration Release
+dotnet test --configuration Release --logger "trx;LogFileName=results.trx"
+dotnet run --project JupiterToys.Automation.Reporting --configuration Release -- TestResults/results.trx TestResults/report
+```
 
-### Notes for anyone editing the build configuration
-
-- The agent needs the .NET 10 SDK installed and (ideally) outbound access to the Playwright CDN; if the agent sits behind a proxy that blocks it, `PlaywrightFixture` will fall back to a Chrome/Edge binary already present on the agent, so installing Chrome on the build agent is a safe alternative.
-- Tests hit a shared public demo site rather than a disposable test environment, so a flaky/slow response from `jupiter.cloud.planittesting.com` can fail the build independently of the code under test — re-running the build is a reasonable first response to an unexplained failure.
-- `ContactPage_SubmitWithMandatoryFieldsPopulated_ShowsSuccessMessage` runs 5 times per build (one `[Theory]` row each) and should show as 5 separate results in the TeamCity test report, not one.
+- `dotnet test` runs headless against the live `jupiter.cloud.planittesting.com` site, so it needs outbound internet access; see [Prerequisites](#prerequisites) for the browser requirement.
+- The last command converts `results.trx` into `TestResults/report/report.json` and `report.html`, and exits non-zero if any test failed.
+- `ContactPage_SubmitWithMandatoryFieldsPopulated_ShowsSuccessMessage` runs 5 times (one `[Theory]` row each) and will show as 5 separate pass/fail results.
